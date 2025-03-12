@@ -11,17 +11,62 @@ import {
   ElPopconfirm,
   ElForm,
   ElFormItem,
-  ElInput
+  ElInput,
+  ElTimeline,
+  ElTimelineItem,
+  ElButtonGroup
 } from 'element-plus'
 import { Table, TableColumn } from '@/components/Table'
 import { ElTag } from 'element-plus'
 import { Dialog } from '@/components/Dialog'
-import { ref, reactive, h, onBeforeUnmount, Ref } from 'vue'
+import { ref, reactive, h, onBeforeUnmount, Ref, onMounted } from 'vue'
 import { getNodeDataApi } from '@/api/node'
 import { getTaskDataApi } from '@/api/task'
 import { useI18n } from '@/hooks/web/useI18n'
-import { UPDATEsYSTEMApi, getVersionDataApi } from '@/api/dashboard/analysis'
+import { UPDATEsYSTEMApi, getAssetDataApi, getVersionDataApi } from '@/api/dashboard/analysis'
 import { checkKeyApi } from '@/api/plugins'
+
+const activeTab = ref('subdomain')
+
+// Asset dynamics data structures
+const assetColumns = {
+  subdomain: reactive<TableColumn[]>([
+    { field: 'domain', label: '子域名' },
+    { field: 'ip', label: 'IP地址' },
+    { field: 'findTime', label: '发现时间' }
+  ]),
+  ip: reactive<TableColumn[]>([
+    { field: 'ip', label: 'IP地址' },
+    { field: 'location', label: '地理位置' },
+    { field: 'findTime', label: '发现时间' }
+  ]),
+  port: reactive<TableColumn[]>([
+    { field: 'ip', label: 'IP地址' },
+    { field: 'port', label: '端口' },
+    { field: 'service', label: '服务' },
+    { field: 'findTime', label: '发现时间' }
+  ]),
+  vulnerability: reactive<TableColumn[]>([
+    { field: 'target', label: '目标' },
+    { field: 'type', label: '漏洞类型' },
+    { field: 'level', label: '危险等级' },
+    { field: 'findTime', label: '发现时间' }
+  ])
+}
+
+const assetData = reactive<{
+  subdomain: string[]
+  ip: string[]
+  port: string[]
+  vulnerability: string[]
+  all: string[]
+}>({
+  subdomain: [],
+  ip: [],
+  port: [],
+  vulnerability: [],
+  all: []
+})
 
 const { t } = useI18n()
 
@@ -116,11 +161,12 @@ const nodeUsageColumns = reactive<TableColumn[]>([
     formatter: (_: Recordable, __: TableColumn, cellValue: string) => {
       let numericValue = parseFloat(cellValue)
       numericValue = parseFloat(numericValue.toFixed(2))
-      return h(ElProgress, {
-        percentage: numericValue,
-        type: 'dashboard',
-        color: numericValue < 50 ? '#26a33f' : numericValue <= 80 ? '#fe9900' : '#df2800'
-      })
+      return () =>
+        h(ElProgress, {
+          percentage: numericValue,
+          type: 'dashboard',
+          color: numericValue < 50 ? '#26a33f' : numericValue <= 80 ? '#fe9900' : '#df2800'
+        })
     }
   },
   {
@@ -129,11 +175,12 @@ const nodeUsageColumns = reactive<TableColumn[]>([
     formatter: (_: Recordable, __: TableColumn, cellValue: string) => {
       let numericValue = parseFloat(cellValue)
       numericValue = parseFloat(numericValue.toFixed(2))
-      return h(ElProgress, {
-        percentage: numericValue,
-        type: 'dashboard',
-        color: numericValue < 50 ? '#26a33f' : numericValue < 80 ? '#fe9900' : '#df2800'
-      })
+      return () =>
+        h(ElProgress, {
+          percentage: numericValue,
+          type: 'dashboard',
+          color: numericValue < 50 ? '#26a33f' : numericValue < 80 ? '#fe9900' : '#df2800'
+        })
     }
   }
 ])
@@ -158,25 +205,26 @@ const versionColumns = reactive<TableColumn[]>([
         msgArray.forEach((line) => {
           content += `<div>${line}</div>`
         })
-        return h(
-          ElTooltip,
-          {
-            placement: 'top',
-            content: content,
-            rawContent: true
-          },
-          [
-            h(
-              ElText,
-              {
-                type: 'danger'
-              },
-              cellValue
-            )
-          ]
-        )
+        return () =>
+          h(
+            ElTooltip,
+            {
+              placement: 'top',
+              content: content,
+              rawContent: true
+            },
+            [
+              h(
+                ElText,
+                {
+                  type: 'danger'
+                },
+                cellValue
+              )
+            ]
+          )
       } else {
-        return h(ElText, cellValue)
+        return () => h(ElText, cellValue)
       }
     }
   }
@@ -195,6 +243,28 @@ const nodeData = ref<
     nodeUsageMemory: number
   }[]
 >([])
+
+const getAssetData = async () => {
+  try {
+    const res = await getAssetDataApi()
+    if (res && res.data) {
+      assetData.subdomain = res.data.subdomain.map((item) => `${item.domain} 新增 ${item.ip}`) || []
+      assetData.ip = res.data.ip.map((item) => `${item.ip} 新增 ${item.location}`) || []
+      assetData.port =
+        res.data.port.map((item) => `${item.ip}:${item.port} 新增 ${item.service}`) || []
+      assetData.vulnerability =
+        res.data.vulnerability.map((item) => `${item.target} 新增 ${item.type}`) || []
+      assetData.all = [
+        ...assetData.subdomain,
+        ...assetData.ip,
+        ...assetData.port,
+        ...assetData.vulnerability
+      ]
+    }
+  } catch (error) {
+    console.error('Error fetching asset data:', error)
+  }
+}
 
 const getNodeState = async () => {
   try {
@@ -268,11 +338,14 @@ const getVersionData = async () => {
 }
 
 const getAllApi = async () => {
-  await Promise.all([getNodeState(), getTaskData()])
+  await Promise.all([getNodeState(), getTaskData(), getAssetData()])
   loading.value = false
 }
-getVersionData()
-getAllApi()
+
+onMounted(async () => {
+  await Promise.all([getVersionData(), getAllApi()])
+})
+
 const refreshInterval = setInterval(getAllApi, 10000)
 
 onBeforeUnmount(() => {
@@ -319,14 +392,70 @@ async function handleSubmit() {
   <PanelGroup />
   <ElRow :gutter="20" justify="space-between">
     <ElCol :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
+      <ElCard class="h-full" shadow="hover">
+        <template #header>
+          <div class="flex items-center">
+            <span class="font-medium">{{ t('dashboard.assetDynamic') }}</span>
+          </div>
+        </template>
+        <ElButtonGroup class="mb-4 flex flex-wrap gap-1">
+          <ElButton
+            @click="activeTab = 'all'"
+            :type="activeTab === 'all' ? 'primary' : ''"
+            class="min-w-20"
+          >
+            全部
+          </ElButton>
+
+          <ElButton
+            :type="activeTab === 'subdomain' ? 'primary' : ''"
+            @click="activeTab = 'subdomain'"
+            class="min-w-20"
+          >
+            子域名
+          </ElButton>
+          <ElButton
+            :type="activeTab === 'ip' ? 'primary' : ''"
+            @click="activeTab = 'ip'"
+            class="min-w-20"
+          >
+            IP
+          </ElButton>
+          <ElButton
+            :type="activeTab === 'port' ? 'primary' : ''"
+            @click="activeTab = 'port'"
+            class="min-w-20"
+          >
+            端口服务
+          </ElButton>
+          <ElButton
+            :type="activeTab === 'vulnerability' ? 'primary' : ''"
+            @click="activeTab = 'vulnerability'"
+            class="min-w-20"
+          >
+            漏洞信息
+          </ElButton>
+        </ElButtonGroup>
+
+        <ElTimeline class="mt-4 px-2">
+          <ElTimelineItem
+            v-for="item in assetData[activeTab]"
+            :key="item.findTime"
+            :timestamp="item.findTime"
+            class="pb-4"
+          >
+            {{ item }}
+          </ElTimelineItem>
+        </ElTimeline>
+      </ElCard>
+    </ElCol>
+    <ElCol :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
       <ElCard shadow="hover" class="mb-20px">
         <template #header>
           <span>{{ t('dashboard.nodeInfo') }}</span>
         </template>
         <Table :columns="nodeColumns" :data="nodeData" stripe :border="false" :height="250" />
       </ElCard>
-    </ElCol>
-    <ElCol :xl="12" :lg="12" :md="24" :sm="24" :xs="24">
       <ElCard shadow="hover" class="mb-20px">
         <template #header>
           <span>{{ t('dashboard.taskInfo') }}</span>
@@ -351,8 +480,6 @@ async function handleSubmit() {
           }"
         />
       </ElCard>
-    </ElCol>
-    <ElCol :span="12">
       <ElCard shadow="hover" class="mb-25px">
         <template #header>
           <div>
@@ -368,8 +495,6 @@ async function handleSubmit() {
           :height="600"
         />
       </ElCard>
-    </ElCol>
-    <ElCol :span="12">
       <ElCard shadow="hover" class="mb-25px">
         <template #header>
           <ElRow>

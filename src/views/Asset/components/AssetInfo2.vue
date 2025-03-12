@@ -533,14 +533,14 @@ let crudSchemas = reactive<CrudSchema[]>([
     fixed: 'right',
     formatter: (row, __: TableColumn, _: number) => {
       return (
-        <>
+        <template>
           <BaseButton
             type="primary"
             onClick={() => openDetail(row.id, row.service + '://' + row.domain, row.ip, row.port)}
           >
             {t('asset.detail')}
           </BaseButton>
-        </>
+        </template>
       )
     },
     minWidth: '100'
@@ -572,7 +572,6 @@ let statisticsHidden = ref(false)
 // 从localStorage读取配置并更新列的显示状态
 const loadColumnConfig = () => {
   const savedConfig = JSON.parse(localStorage.getItem(`columnConfig_${index}`) || '{}')
-  console.log(savedConfig)
   crudSchemas.forEach((col) => {
     if (savedConfig[col.field] !== undefined && col.field != 'select') {
       col.hidden = savedConfig[col.field] // 复列的显示状态
@@ -588,13 +587,11 @@ const saveColumnConfig = () => {
     return acc
   }, {})
   config['statisticsHidden'] = statisticsHidden.value
-  console.log('statisticsHidden.value', statisticsHidden.value)
   localStorage.setItem(`columnConfig_${index}`, JSON.stringify(config)) // 按index保存配置
 }
 
 // 处理列显示状态变化
 const handleColumnVisibilityChange = ({ field, hidden }) => {
-  console.log(field, hidden)
   const columnIndex = crudSchemas.findIndex((col) => col.field === field)
   if (columnIndex !== -1) {
     // 使用对象的展开运算符来创建一个新的对象，并更新隐藏属性
@@ -607,7 +604,6 @@ loadColumnConfig()
 const { allSchemas } = useCrudSchemas(crudSchemas)
 const { tableRegister, tableState, tableMethods } = useTable({
   fetchDataApi: async () => {
-    console.log(activeSegment.value)
     if (activeSegment.value == 'cardSegment') {
       const resCard = await getAssetCardData()
       return {
@@ -615,10 +611,8 @@ const { tableRegister, tableState, tableMethods } = useTable({
         total: resCard
       }
     }
-    console.log('dsadwas')
     const { currentPage, pageSize } = tableState
     getAssetstatistics()
-    console.log('dsadwas2222')
     const res = await getAssetApi(searchParams.value, currentPage.value, pageSize.value, filter)
     return {
       list: res.data.list,
@@ -649,7 +643,6 @@ const handleFilterSearch = (data: any, newFilters: any) => {
 const dynamicTags = ref<string[]>([])
 const changeTags = (type, value) => {
   const key = `${type}=${value}`
-  console.log(key)
   dynamicTags.value = [...dynamicTags.value, key]
 }
 const handleClose = (tag: string) => {

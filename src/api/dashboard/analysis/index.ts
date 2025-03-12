@@ -4,7 +4,8 @@ import type {
   UserAccessSource,
   WeeklyUserActivity,
   MonthlySales,
-  VersionData
+  VersionData,
+  AssetData
 } from './types'
 
 interface DashboardTotalTypesResponse {
@@ -40,4 +41,47 @@ export const UPDATEsYSTEMApi = (
   key: string
 ): Promise<IResponse<VersionDataResponse>> => {
   return request.post({ url: '/api/system/update', data: { server, scan, key } })
+}
+
+export const getAssetDataApi = (): Promise<IResponse<AssetData>> => {
+  return new Promise((resolve) => {
+    resolve({
+      message: 'success',
+      logs: '',
+      code: 200,
+      data: {
+        subdomain: [
+          {
+            domain: 'example.com',
+            ip: '192.168.1.1',
+            findTime: '2021-01-01 12:00:00'
+          }
+        ],
+        ip: [
+          {
+            ip: '192.168.1.1',
+            location: '80',
+            findTime: '2021-01-01 12:00:00'
+          }
+        ],
+        port: [
+          {
+            ip: '192.168.1.1',
+            port: '80',
+            service: 'HTTP',
+            findTime: '2021-01-01 12:00:00'
+          }
+        ],
+        vulnerability: [
+          {
+            target: 'example.com',
+            type: 'XSS',
+            level: 'High',
+            findTime: '2021-01-01 12:00:00'
+          }
+        ]
+      }
+    })
+  })
+  // return request.get({ url: '/api/asset/dynamic' })
 }

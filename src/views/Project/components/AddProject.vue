@@ -226,7 +226,7 @@ const closeTemplateDialog = () => {
         v-model="projectForm.ignore"
         :placeholder="t('task.ignoreMsg')"
         type="textarea"
-        rows="10"
+        :rows="10"
       />
     </ElFormItem>
     <ElFormItem label="Logo" prop="logo">

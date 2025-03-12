@@ -164,7 +164,7 @@ const action = (id: string) => {
     >
       <template #content="row">
         <ElDropdown trigger="contextmenu" @command="handleCommand">
-          <div class="flex cursor-pointer">
+          <div class="flex cursor-pointer" @click="action(row.id)">
             <ElCheckbox :value="row.id" class="pr-16px" v-if="multipleSelection" />
             <div class="pr-16px">
               <template v-if="row.logo != ''">

@@ -28,3 +28,39 @@ export type VersionData = {
   lversion: string
   msg: string
 }
+
+
+
+
+export type SubdomainScanLog = {
+  domain: string
+  ip: string
+  findTime: string
+}
+
+export type IpScanLog = {
+  ip: string
+  location: string
+  findTime: string
+}
+
+export type PortScanLog = {
+  ip: string
+  port: string
+  service: string
+  findTime: string
+}
+
+export type Vulnerability  = {
+  target: string
+  type: string
+  level: string
+  findTime: string
+}
+
+export type AssetData = {
+  subdomain: SubdomainScanLog[]
+  ip: IpScanLog[]
+  port: PortScanLog[]
+  vulnerability: Vulnerability[]
+}

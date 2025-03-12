@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import type { App } from 'vue'
 import { Layout, getParentLayout } from '@/utils/routerHelper'
@@ -20,7 +20,7 @@ export const constantRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/redirect',
     component: Layout,
-    name: 'Redirect',
+    name: 'RedirectParent',
     children: [
       {
         path: '/redirect/:path(.*)',
@@ -61,13 +61,13 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
     path: '/dashboard',
     component: Layout,
     redirect: '/dashboard/index',
-    name: 'Dashboard',
+    name: 'DashboardParent',
     meta: {},
     children: [
       {
         path: 'index',
         component: () => import('@/views/Dashboard/Analysis.vue'),
-        name: 'index',
+        name: 'Dashboard',
         meta: {
           title: t('router.dashboard'),
           icon: 'ant-design:dashboard-filled',
@@ -79,7 +79,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/asset-information',
     component: Layout,
-    name: 'AssetInformation',
+    name: 'AssetInformationParent',
     redirect: '/asset-information/index',
     meta: {},
     children: [
@@ -139,7 +139,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/plugin-management',
     component: Layout,
-    name: 'Plugin Management',
+    name: 'PluginManagementParent',
     redirect: '/plugin-management/index',
     meta: {},
     children: [
@@ -158,7 +158,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/node-management',
     component: Layout,
-    name: 'NodeManagement',
+    name: 'NodeManagementParent',
     redirect: '/node-management/index',
     meta: {},
     children: [
@@ -177,7 +177,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/project-management',
     component: Layout,
-    name: 'ProjectManagement',
+    name: 'ProjectManagementParent',
     redirect: '/project-management/index',
     meta: {},
     children: [
@@ -209,7 +209,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/poc-management',
     component: Layout,
-    name: 'POCManagement',
+    name: 'POCManagementParent',
     redirect: '/poc-management/index',
     meta: {},
     children: [
@@ -228,7 +228,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/fingerprint-management',
     component: Layout,
-    name: 'FingerprintManagement',
+    name: 'FingerprintManagementParent',
     redirect: '/fingerprint-management/index',
     meta: {},
     children: [
@@ -247,14 +247,14 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/sensitive-information-rules',
     component: Layout,
-    name: 'Sensitive information rules',
+    name: 'SensitiveinformationRulesParent',
     redirect: '/sensitive-information-rules/index',
     meta: {},
     children: [
       {
         path: 'index',
         component: () => import('@/views/Sensitive/Sensitive.vue'),
-        name: 'Sensitive information rules',
+        name: 'SensitiveinformationRules',
         meta: {
           title: t('router.sensitiveInformationRules'),
           icon: 'carbon:deploy-rules',
@@ -266,7 +266,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/dictionary-management',
     component: Layout,
-    name: 'Dictionary management',
+    name: 'DictionaryManagementParent',
     meta: {
       title: t('router.dictionaryManagement'),
       icon: 'material-symbols:dictionary'
@@ -275,7 +275,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
       {
         path: 'manage',
         component: () => import('@/views/DictionaryManagement/manage.vue'),
-        name: 'Dictionary management',
+        name: 'DictionaryManagement',
         meta: {
           title: t('router.dictionaryManagement'),
           icon: 'arcticons:dictionaryformids',
@@ -317,7 +317,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/configuration',
     component: Layout,
-    name: 'configuration',
+    name: 'ConfigurationParent',
     meta: {
       title: t('router.configuration'),
       icon: 'tdesign:system-setting'
@@ -326,7 +326,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
       {
         path: 'system',
         component: () => import('@/views/Configuration/system.vue'),
-        name: 'system configuration',
+        name: 'SystemConfiguration',
         meta: {
           title: t('router.system'),
           icon: 'uil:setting',
@@ -336,7 +336,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
       {
         path: 'subfinder',
         component: () => import('@/views/Configuration/Subfinder.vue'),
-        name: 'subfinder configuration',
+        name: 'SubfinderConfiguration',
         meta: {
           title: t('router.subfinder'),
           icon: 'ri:tools-line',
@@ -346,7 +346,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
       {
         path: 'rad',
         component: () => import('@/views/Configuration/rad.vue'),
-        name: 'rad configuration',
+        name: 'RadConfiguration',
         meta: {
           title: t('router.rad'),
           icon: 'game-icons:web-spit',
@@ -358,13 +358,13 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/about',
     component: Layout,
-    name: 'About',
+    name: 'AboutParent',
     meta: {},
     children: [
       {
         path: 'index',
         component: () => import('@/views/about.vue'),
-        name: 'about',
+        name: 'About',
         meta: {
           title: 'About',
           icon: 'carbon:deploy-rules',
@@ -376,7 +376,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   strict: true,
   routes: constantRouterMap as RouteRecordRaw[],
   scrollBehavior: () => ({ left: 0, top: 0 })

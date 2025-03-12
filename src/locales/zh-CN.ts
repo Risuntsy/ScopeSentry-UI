@@ -268,7 +268,8 @@ export default {
     informationLeakage: '信息泄露',
     URL: 'URL',
     nodeInfo: '节点状态信息',
-    taskInfo: '任务信息'
+    taskInfo: '任务信息',
+    assetDynamic: '资产动态'
   },
   node: {
     nodeName: '节点名称',

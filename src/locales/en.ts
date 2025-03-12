@@ -269,7 +269,8 @@ export default {
     informationLeakage: 'Information leakage',
     URL: 'URL',
     nodeInfo: 'Node Status Information',
-    taskInfo: 'Task Information'
+    taskInfo: 'Task Information',
+    assetDynamic: 'Asset Dynamic'
   },
   node: {
     nodeName: 'Node Name',

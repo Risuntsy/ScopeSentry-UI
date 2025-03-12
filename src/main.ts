@@ -46,9 +46,9 @@ const setupAll = async () => {
 
   setupElementPlus(app)
 
-  setupRouter(app)
-
   setupPermission(app)
+
+  setupRouter(app)
 
   app.mount('#app')
 }
